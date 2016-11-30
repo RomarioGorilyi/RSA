@@ -1,9 +1,9 @@
-package ua.kpi.ipt.asymcrypt.rsa;
+package main.java.ua.kpi.ipt.asymcrypt.rsa;
 
-import ua.kpi.ipt.asymcrypt.rsa.prime.PrimeBigInteger;
+import main.java.ua.kpi.ipt.asymcrypt.rsa.prime.PrimeBigInteger;
 
 /**
- * Created by Roman Horilyi on 20.11.2016.
+ * @author Roman Horilyi
  */
 public class TestApp {
     public static void main(String[] args) {

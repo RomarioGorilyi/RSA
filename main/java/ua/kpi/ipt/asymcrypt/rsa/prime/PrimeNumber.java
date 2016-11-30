@@ -1,9 +1,9 @@
-package ua.kpi.ipt.asymcrypt.rsa.prime;
+package main.java.ua.kpi.ipt.asymcrypt.rsa.prime;
 
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Created by Roman Horilyi on 20.11.2016.
+ * @author Roman Horilyi
  */
 public class PrimeNumber {
 
@@ -21,7 +21,7 @@ public class PrimeNumber {
     }
 
     public void setValue() {
-        value = findPrimeValue();
+        value = findPrimeNumber();
     }
 
     private int findX(int bottomBound, int upperBound) {
@@ -38,7 +38,7 @@ public class PrimeNumber {
         return m <= upperBound ? m : findM();
     }
 
-    private int findPrimeValue() {
+    private int findPrimeNumber() {
         int m = findM();
         for (int i = 0; i <= (upperBound - m) / 2; i++) {
             int p = m + 2 * i;
@@ -47,7 +47,7 @@ public class PrimeNumber {
             }
         }
 
-        return findPrimeValue();
+        return findPrimeNumber();
     }
 
     public boolean isPrimeUsingTrialDivision(int number) {

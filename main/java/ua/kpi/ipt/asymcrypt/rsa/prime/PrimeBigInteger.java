@@ -1,10 +1,10 @@
-package ua.kpi.ipt.asymcrypt.rsa.prime;
+package main.java.ua.kpi.ipt.asymcrypt.rsa.prime;
 
 import java.math.BigInteger;
 import java.security.SecureRandom;
 
 /**
- * Created by Roman Horilyi on 20.11.2016.
+ * @author Roman Horilyi
  */
 public class PrimeBigInteger {
 
@@ -15,7 +15,7 @@ public class PrimeBigInteger {
     }
 
     public void setValue() {
-        value = findPrimeValue();
+        value = findAttackResistantPrimeNumber();
     }
 
     /**
@@ -63,7 +63,34 @@ public class PrimeBigInteger {
         return m;
     }
 
-    private BigInteger findPrimeValue() {
+    /**
+     * Finds a prime number p derived from another prime number
+     * because {@code p - 1} has to contain big prime divisors (in the best case, p - 1 = 2p', where p' - prime)
+     * in order to resist crypto-analytical attacks on a RSA schema key.
+     *
+     * @return a prime number
+     */
+    private BigInteger findAttackResistantPrimeNumber() {
+        BigInteger prime = findPrimeNumber();
+        BigInteger resultPrime;
+
+        for (int i = 1;; i++) {
+            resultPrime = prime.multiply(BigInteger.valueOf(2))
+                               .multiply(BigInteger.valueOf(i))
+                               .add(BigInteger.valueOf(1));
+            if (isPrimeUsingTrialDivision(resultPrime) && isPrimeUsingMillerRabinTest(resultPrime)) {
+                return resultPrime;
+            }
+        }
+    }
+
+    /**
+     * Finds a prime number checking its primality using
+     * {@link #isPrimeUsingTrialDivision(BigInteger)} and {@link #isPrimeUsingMillerRabinTest(BigInteger)} methods.
+     *
+     * @return a prime number
+     */
+    private BigInteger findPrimeNumber() {
         BigInteger m = findM(32);
         for (int i = 0; i < 100; i++) {
             BigInteger p = m.add(BigInteger.valueOf(2 * i));
@@ -72,9 +99,16 @@ public class PrimeBigInteger {
             }
         }
 
-        return findPrimeValue();
+        return findPrimeNumber();
     }
 
+    /**
+     * Checks if the specified number is prime using trial division method
+     * (simply dividing by prime numbers such as 2, 3, 5, 7, 11, 13, etc.).
+     *
+     * @param number a number to check if it is prime
+     * @return {@code true} if the specified number is prime
+     */
     public boolean isPrimeUsingTrialDivision(BigInteger number) {
         return number.mod(BigInteger.valueOf(2)).intValue() != 0
                 && number.mod(BigInteger.valueOf(3)).intValue() != 0
@@ -84,6 +118,13 @@ public class PrimeBigInteger {
                 && number.mod(BigInteger.valueOf(13)).intValue() != 0;
     }
 
+    /**
+     * Checks if the specified number is prime using
+     * (<a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test">Miller–Rabin primality test</a>.
+     *
+     * @param number a number to check if it is prime
+     * @return {@code true} if the specified number is prime
+     */
     public boolean isPrimeUsingMillerRabinTest(BigInteger number) {
         boolean isPrime = false;
 

@@ -5,30 +5,49 @@ import java.util.concurrent.ThreadLocalRandom;
 /**
  * @author Roman Horilyi
  */
-public class PrimeNumber {
+public class PrimeNumberGenerator {
 
-    private int value;
+    /**
+     * The {@code int} value that represents a MIN value of a generated prime number.
+     */
     private int bottomBound;
+
+    /**
+     * The {@code int} value that represents a MAX value of a generated prime number.
+     */
     private int upperBound;
 
-    public PrimeNumber(int bottomBound, int upperBound) {
+    public PrimeNumberGenerator(int bottomBound, int upperBound) {
         this.bottomBound = bottomBound;
         this.upperBound = upperBound;
     }
 
-    public int getValue() {
-        return value;
+    /**
+     * Generates a prime int number.
+     *
+     * @return a prime number
+     */
+    public int generateNumber() {
+        return findPrimeNumber();
     }
 
-    public void setValue() {
-        value = findPrimeNumber();
-    }
-
+    /**
+     * Finds X of that is greater than the specified bottom bound and is lower than the specified upper bound.
+     *
+     * @param bottomBound number that should be lower than a newly found X number
+     * @param upperBound number that should be higher than a newly found X number
+     * @return {@code int} X
+     */
     private int findX(int bottomBound, int upperBound) {
         ThreadLocalRandom random = ThreadLocalRandom.current();
         return random.nextInt(bottomBound, upperBound + 1);
     }
 
+    /**
+     * Finds M that isn't lower than a newly found X and isn't a paired number.
+     *
+     * @return {@code int} M
+     */
     private int findM() {
         int m = findX(bottomBound, upperBound);
         while ((m <= upperBound) && (m % 2 == 0)) {
@@ -38,6 +57,12 @@ public class PrimeNumber {
         return m <= upperBound ? m : findM();
     }
 
+    /**
+     * Finds a prime number checking its primality using
+     * {@link #isPrimeUsingTrialDivision(int)} and {@link #isPrimeUsingMillerRabinTest(int)} methods.
+     *
+     * @return a prime number
+     */
     private int findPrimeNumber() {
         int m = findM();
         for (int i = 0; i <= (upperBound - m) / 2; i++) {
@@ -50,6 +75,13 @@ public class PrimeNumber {
         return findPrimeNumber();
     }
 
+    /**
+     * Checks if the specified number is prime using trial division method
+     * (simply dividing by prime numbers such as 2, 3, 5, 7, 11, 13, etc.).
+     *
+     * @param number a number to check if it is prime
+     * @return {@code true} if the specified number is prime
+     */
     public boolean isPrimeUsingTrialDivision(int number) {
         return number % 2 != 0
                 && number % 3 != 0
@@ -59,6 +91,13 @@ public class PrimeNumber {
                 && number % 13 != 0;
     }
 
+    /**
+     * Checks if the specified number is prime using
+     * (<a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test">Miller–Rabin primality test</a>.
+     *
+     * @param number a number to check if it is prime
+     * @return {@code true} if the specified number is prime
+     */
     public boolean isPrimeUsingMillerRabinTest(int number) {
         boolean isPrime = false;
 
@@ -102,6 +141,9 @@ public class PrimeNumber {
         return true;
     }
 
+    /**
+     * Finds great common divisor (GCD) of two specified numbers.
+     */
     private int findGCD(int number1, int number2) {
         if (number2 == 0) {
             return number1;

@@ -1,21 +1,21 @@
 package main.java.ua.kpi.ipt.asymcrypt.rsa.prime;
 
 import java.math.BigInteger;
-import java.security.SecureRandom;
+
+import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.RandomBigInteger.generateRandomNumber;
 
 /**
  * @author Roman Horilyi
  */
-public class PrimeBigInteger {
+public class PrimeBigIntegerGenerator {
 
-    private BigInteger value;
-
-    public BigInteger getValue() {
-        return value;
-    }
-
-    public void setValue() {
-        value = findAttackResistantPrimeNumber();
+    /**
+     * Generates a prime {@code BigInteger} number that is resistant to attacks.
+     *
+     * @return a prime number
+     */
+    public BigInteger generatePrimeNumber() {
+        return findAttackResistantPrimeNumber();
     }
 
     /**
@@ -25,24 +25,20 @@ public class PrimeBigInteger {
      * @return {@code BigInteger} X
      */
     private BigInteger findX(int length) {
-        SecureRandom secureRandom = new SecureRandom();
-        byte[] randoms = new byte[length];
-        secureRandom.nextBytes(randoms);
-
-        return new BigInteger(randoms).abs();
+        return generateRandomNumber(length);
     }
 
     /**
-     * Finds X of the specified length that is lower than the specified {@code BigInteger} number.
+     * Finds X of the specified length that is lower than the specified MAX value.
      *
      * @param length length of the generated X in bytes
-     * @param upperBound {@code BigInteger} number that should be higher than a newly found X number.
+     * @param max upper limit of a {@code BigInteger} X
      * @return {@code BigInteger} X
      */
-    private BigInteger findX(int length, BigInteger upperBound) {
-        BigInteger x = findX(length);
-        while (x.compareTo(upperBound) >= 0) {
-            x = findX(length);
+    private BigInteger findX(int length, BigInteger max) {
+        BigInteger x = generateRandomNumber(length);
+        while (x.compareTo(max) >= 0) {
+            x = generateRandomNumber(length);
         }
 
         return x;
@@ -57,7 +53,7 @@ public class PrimeBigInteger {
     private BigInteger findM(int length) {
         BigInteger m = findX(length);
         while (m.remainder(BigInteger.valueOf(2)).intValue() == 0) {
-            m = m.add(BigInteger.valueOf(1));
+            m = m.add(BigInteger.ONE);
         }
 
         return m;
@@ -77,7 +73,7 @@ public class PrimeBigInteger {
         for (int i = 1;; i++) {
             resultPrime = prime.multiply(BigInteger.valueOf(2))
                                .multiply(BigInteger.valueOf(i))
-                               .add(BigInteger.valueOf(1));
+                               .add(BigInteger.ONE);
             if (isPrimeUsingTrialDivision(resultPrime) && isPrimeUsingMillerRabinTest(resultPrime)) {
                 return resultPrime;
             }
@@ -130,7 +126,7 @@ public class PrimeBigInteger {
 
         int k = 20;
 
-        BigInteger d = number.subtract(BigInteger.valueOf(1));
+        BigInteger d = number.subtract(BigInteger.ONE);
         int s = 0;
         while (d.mod(BigInteger.valueOf(2)).intValue() == 0) {
             d = d.divide(BigInteger.valueOf(2));
@@ -142,19 +138,19 @@ public class PrimeBigInteger {
         while (counter++ < k) {
             BigInteger x = findX(32, number); // 1 < x < number
             if (x.gcd(number).intValue() == 1) {
-                if ((x.modPow(d, number).compareTo(BigInteger.valueOf(1)) == 0)
-                        || (x.modPow(d, number).compareTo(number.subtract(BigInteger.valueOf(1))) == 0)) {
+                if ((x.modPow(d, number).compareTo(BigInteger.ONE) == 0)
+                        || (x.modPow(d, number).compareTo(number.subtract(BigInteger.ONE)) == 0)) {
                     isPrime = true;
                 } else {
                     for (int r = 1; r < s; r++) {
                         BigInteger xR = x.modPow(d.multiply(BigInteger.valueOf(2).pow(r)),
-                                d.multiply(BigInteger.valueOf(2).pow(r))).add(BigInteger.valueOf(1))
+                                d.multiply(BigInteger.valueOf(2).pow(r))).add(BigInteger.ONE)
                                          .mod(number);
 
                         if (xR.compareTo(number.subtract(BigInteger.valueOf(1))) == 0) {
                             isPrime = true;
                             break;
-                        } else if (xR.compareTo(BigInteger.valueOf(1)) == 0) {
+                        } else if (xR.compareTo(BigInteger.ONE) == 0) {
                             return false;
                         }
                     }

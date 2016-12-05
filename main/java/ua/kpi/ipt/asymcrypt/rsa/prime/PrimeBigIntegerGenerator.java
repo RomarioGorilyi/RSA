@@ -2,7 +2,7 @@ package main.java.ua.kpi.ipt.asymcrypt.rsa.prime;
 
 import java.math.BigInteger;
 
-import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.RandomBigInteger.generateRandomNumber;
+import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.BigIntegerUtil.generateRandomNumber;
 
 /**
  * @author Roman Horilyi
@@ -10,12 +10,13 @@ import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.RandomBigInteger.generateR
 public class PrimeBigIntegerGenerator {
 
     /**
-     * Generates a prime {@code BigInteger} number that is resistant to attacks.
+     * Generates a prime {@code BigInteger} number of the specified length that is resistant to attacks.
      *
+     * @param length the number of bytes in the generated prime number
      * @return a prime number
      */
-    public BigInteger generatePrimeNumber() {
-        return findAttackResistantPrimeNumber();
+    public BigInteger generatePrimeNumber(int length) {
+        return findAttackResistantPrimeNumber(length);
     }
 
     /**
@@ -60,42 +61,44 @@ public class PrimeBigIntegerGenerator {
     }
 
     /**
+     * Finds a prime number with the specified length checking its primality using
+     * {@link #isPrimeUsingTrialDivision(BigInteger)} and {@link #isPrimeUsingMillerRabinTest(BigInteger, int)} methods.
+     *
+     * @param length the number of bytes in the generated prime number
+     * @return a prime number
+     */
+    private BigInteger findPrimeNumber(int length) {
+        BigInteger m = findM(length);
+        for (int i = 0; i < 100; i++) {
+            BigInteger p = m.add(BigInteger.valueOf(2 * i));
+            if (isPrimeUsingTrialDivision(p) && isPrimeUsingMillerRabinTest(p, length)) {
+                return p;
+            }
+        }
+
+        return findPrimeNumber(length);
+    }
+
+    /**
      * Finds a prime number p derived from another prime number
      * because {@code p - 1} has to contain big prime divisors (in the best case, p - 1 = 2p', where p' - prime)
      * in order to resist crypto-analytical attacks on a RSA schema key.
      *
+     * @param length the number of bytes in the generated prime number
      * @return a prime number
      */
-    private BigInteger findAttackResistantPrimeNumber() {
-        BigInteger prime = findPrimeNumber();
+    private BigInteger findAttackResistantPrimeNumber(int length) {
+        BigInteger prime = findPrimeNumber(length);
         BigInteger resultPrime;
 
         for (int i = 1;; i++) {
             resultPrime = prime.multiply(BigInteger.valueOf(2))
                                .multiply(BigInteger.valueOf(i))
                                .add(BigInteger.ONE);
-            if (isPrimeUsingTrialDivision(resultPrime) && isPrimeUsingMillerRabinTest(resultPrime)) {
+            if (isPrimeUsingTrialDivision(resultPrime) && isPrimeUsingMillerRabinTest(resultPrime, length)) {
                 return resultPrime;
             }
         }
-    }
-
-    /**
-     * Finds a prime number checking its primality using
-     * {@link #isPrimeUsingTrialDivision(BigInteger)} and {@link #isPrimeUsingMillerRabinTest(BigInteger)} methods.
-     *
-     * @return a prime number
-     */
-    private BigInteger findPrimeNumber() {
-        BigInteger m = findM(32);
-        for (int i = 0; i < 100; i++) {
-            BigInteger p = m.add(BigInteger.valueOf(2 * i));
-            if (isPrimeUsingTrialDivision(p) && isPrimeUsingMillerRabinTest(p)) {
-                return p;
-            }
-        }
-
-        return findPrimeNumber();
     }
 
     /**
@@ -116,12 +119,13 @@ public class PrimeBigIntegerGenerator {
 
     /**
      * Checks if the specified number is prime using
-     * (<a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test">Miller–Rabin primality test</a>.
+     * <a href="https://en.wikipedia.org/wiki/Miller%E2%80%93Rabin_primality_test">Miller–Rabin primality test</a>.
      *
      * @param number a number to check if it is prime
+     * @param length the number of bytes in the generated prime number
      * @return {@code true} if the specified number is prime
      */
-    public boolean isPrimeUsingMillerRabinTest(BigInteger number) {
+    public boolean isPrimeUsingMillerRabinTest(BigInteger number, int length) {
         boolean isPrime = false;
 
         int k = 20;
@@ -136,7 +140,7 @@ public class PrimeBigIntegerGenerator {
         int counter = 0;
 
         while (counter++ < k) {
-            BigInteger x = findX(32, number); // 1 < x < number
+            BigInteger x = findX(length, number); // 1 < x < number
             if (x.gcd(number).intValue() == 1) {
                 if ((x.modPow(d, number).compareTo(BigInteger.ONE) == 0)
                         || (x.modPow(d, number).compareTo(number.subtract(BigInteger.ONE)) == 0)) {

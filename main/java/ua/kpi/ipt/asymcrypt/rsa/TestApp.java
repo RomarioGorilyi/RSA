@@ -12,6 +12,6 @@ public class TestApp {
         System.out.println(primeNumberGenerator.generateNumber());
 
         PrimeBigIntegerGenerator primeBigIntegerGenerator = new PrimeBigIntegerGenerator();
-        System.out.println(primeBigIntegerGenerator.generatePrimeNumber().toString(16));
+        System.out.println(primeBigIntegerGenerator.generatePrimeNumber(32).toString(16));
     }
 }

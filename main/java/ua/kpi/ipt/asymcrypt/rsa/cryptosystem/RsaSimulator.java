@@ -1,6 +1,6 @@
 package main.java.ua.kpi.ipt.asymcrypt.rsa.cryptosystem;
 
-import main.java.ua.kpi.ipt.asymcrypt.rsa.entity.Transactor;
+import main.java.ua.kpi.ipt.asymcrypt.rsa.entity.Party;
 
 import java.math.BigInteger;
 import java.util.Scanner;
@@ -10,42 +10,42 @@ import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.BigIntegerUtil.generateRan
 /**
  * @author Roman Horilyi
  */
-public class RsaSimulator {
+public class RsaSimulator { // TODO create View and Controller, and remove this shit !!!
 
     public static void main(String[] args) {
         RsaSimulator rsaSimulator = new RsaSimulator();
 
-        Transactor transactorA = rsaSimulator.createTransactor();
-        Transactor transactorB = rsaSimulator.createTransactor();
+        Party partyA = rsaSimulator.createParty();
+//        Party partyB = rsaSimulator.createParty();
 
-//        rsaSimulator.encrypt(transactor);
-//        rsaSimulator.decrypt(transactor);
-//        rsaSimulator.sign(transactor);
-//        rsaSimulator.verify(transactor);
-        rsaSimulator.sendKey(transactorA);
-        rsaSimulator.receiveKey(transactorB);
+//        rsaSimulator.encrypt(party);
+//        rsaSimulator.decrypt(party);
+//        rsaSimulator.sign(party);
+//        rsaSimulator.verify(party);
+        rsaSimulator.sendKey(partyA);
+//        rsaSimulator.receiveKey(partyA);
 
 //        rsaSimulator.simulateRsaSchema();
     }
 
     /**
-     * Creates a transactor and initializes it.
+     * Creates a party and initializes it.
      *
      * @return initialized transactor
      */
-    public Transactor createTransactor() {
-        Transactor transactor = new Transactor();
+    public Party createParty() {
+        Party party = new Party();
 
-        transactor.generateN(32);
-        System.out.println("n: " + transactor.getN().toString(16));
-        transactor.generateE();
-        System.out.println("e: " + transactor.getE().toString(16));
-        transactor.calculateD();
+        party.generateN(32);
+        System.out.println("n: " + party.getN().toString(16));
+        party.generateE();
+        System.out.println("e: " + party.getE().toString(16));
+        party.calculateD();
 
-        return transactor;
+        return party;
     }
 
-    public void encrypt(Transactor transactor) {
+    public void encrypt(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter message to encrypt: ");
         BigInteger message = new BigInteger(scanner.next(), 16);
@@ -54,29 +54,29 @@ public class RsaSimulator {
         System.out.println("Enter public exponent: ");
         BigInteger exponent = new BigInteger(scanner.next(), 16);
 
-        System.out.println("Encrypted message: " + transactor.encryptMessage(message, exponent, modulus)
-                                                              .toString(16));
+        System.out.println("Encrypted message: " + party.encryptMessage(message, exponent, modulus)
+                                                        .toString(16));
     }
 
-    public void decrypt(Transactor transactor) {
+    public void decrypt(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter encrypted message: ");
         BigInteger encryptedMessage = new BigInteger(scanner.next(), 16);
 
-        System.out.println("Decrypted message: " + transactor.decryptMessage(encryptedMessage)
-                                                              .toString(16));
+        System.out.println("Decrypted message: " + party.decryptMessage(encryptedMessage)
+                                                        .toString(16));
     }
 
-    public void sign(Transactor transactor) {
+    public void sign(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter message: ");
         BigInteger message = new BigInteger(scanner.next(), 16);
 
-        System.out.println("Signature: " + transactor.signMessage(message)
-                                                      .toString(16));
+        System.out.println("Signature: " + party.signMessage(message)
+                                                .toString(16));
     }
 
-    public void verify(Transactor transactor) {
+    public void verify(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter message: ");
         BigInteger message = new BigInteger(scanner.next(), 16);
@@ -87,10 +87,10 @@ public class RsaSimulator {
         System.out.println("Enter public exponent: ");
         BigInteger exponent = new BigInteger(scanner.next(), 16);
 
-        System.out.println("Verification: " + transactor.verifySignature(message, signature, exponent, modulus));
+        System.out.println("Verification: " + party.verifySignature(message, signature, exponent, modulus));
     }
 
-    public void sendKey(Transactor transactor) {
+    public void sendKey(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter secret key: ");
         BigInteger key = new BigInteger(scanner.next(), 16);
@@ -99,12 +99,17 @@ public class RsaSimulator {
         System.out.println("Enter modulus: ");
         BigInteger modulus = new BigInteger(scanner.next(), 16);
 
-        BigInteger[] keyAndSignature = transactor.sendKey(key, exponent, modulus);
+        if (party.getN().compareTo(modulus) == 1) {
+            System.out.println("Error! Sender modulus must be less that receiver's one." +
+                    "Please, enter receiver's modulus again.");
+        }
+
+        BigInteger[] keyAndSignature = party.sendKey(key, exponent, modulus);
         System.out.println("Encrypted key: " + keyAndSignature[0].toString(16));
         System.out.println("Signature: " + keyAndSignature[1].toString(16));
     }
 
-    public void receiveKey(Transactor transactor) {
+    public void receiveKey(Party party) {
         Scanner scanner = new Scanner(System.in);
         System.out.println("Enter encrypted key: ");
         BigInteger key = new BigInteger(scanner.next(), 16);
@@ -115,26 +120,26 @@ public class RsaSimulator {
         System.out.println("Enter modulus: ");
         BigInteger modulus = new BigInteger(scanner.next(), 16);
 
-        System.out.println("Decrypted key: " + transactor.receiveKey(key, signature, exponent, modulus)
-                                                         .toString(16));
+        System.out.println("Decrypted key: " + party.receiveKey(key, signature, exponent, modulus)
+                                                    .toString(16));
     }
 
     public void simulateRsaSchema() {
-        System.out.println("Transactor A:");
-        Transactor transactorA = createTransactor();
-        System.out.println("Transactor B:");
-        Transactor transactorB = createTransactor();
-        while (transactorA.getN().compareTo(transactorB.getN()) == 1) {
-            transactorB = createTransactor();
+        System.out.println("Party A:");
+        Party partyA = createParty();
+        System.out.println("Party B:");
+        Party partyB = createParty();
+        while (partyA.getN().compareTo(partyB.getN()) == 1) {
+            partyB = createParty();
         }
 
         BigInteger message = generateRandomNumber(32);
         System.out.println("Message: " + message.toString(16));
 
-        BigInteger encryptedMessage = transactorA.encryptMessage(message, transactorB.getE(), transactorB.getN());
+        BigInteger encryptedMessage = partyA.encryptMessage(message, partyB.getE(), partyB.getN());
         System.out.println("Encrypted message: " + encryptedMessage.toString(16));
 
-        BigInteger decryptedMessage = transactorB.decryptMessage(encryptedMessage);
+        BigInteger decryptedMessage = partyB.decryptMessage(encryptedMessage);
         System.out.println("Decrypted message: " + decryptedMessage.toString(16));
 
         if (decryptedMessage.compareTo(message) == 0) {
@@ -143,10 +148,10 @@ public class RsaSimulator {
             System.out.println("Decrypted message is equal to the Message: false!");
         }
 
-        BigInteger signature = transactorA.signMessage(message);
+        BigInteger signature = partyA.signMessage(message);
         System.out.println("\nSignature: " + signature.toString(16));
 
-        boolean isVerified = transactorB.verifySignature(message, signature, transactorA.getE(), transactorA.getN());
+        boolean isVerified = partyB.verifySignature(message, signature, partyA.getE(), partyA.getN());
         System.out.println("Verification: " + isVerified);
     }
 }

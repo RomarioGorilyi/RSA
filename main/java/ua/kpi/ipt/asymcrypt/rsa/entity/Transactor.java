@@ -126,11 +126,51 @@ public class Transactor {
      *
      * @param message {@code BigInteger} with which the signature is verified
      * @param signature {@code BigInteger} which is verified to be correct
-     * @param e the public exponent
-     * @param n the modulus
+     * @param e public exponent
+     * @param n modulus
      * @return {@code true} if the signature is correct
      */
     public boolean verifySignature(BigInteger message, BigInteger signature, BigInteger e, BigInteger n) {
         return message.compareTo(signature.modPow(e, n)) == 0;
+    }
+
+    /**
+     * Sends the specified encrypted secret key with its signature
+     * using the specified public exponent {@code e1} and the specified modulus {@code n1}.
+     *
+     * @param k secret key to send
+     * @param e1 public exponent
+     * @param n1 modulus
+     * @return encrypted secret key and its signature in the {@code BigInteger} array
+     */
+    public BigInteger[] sendKey(BigInteger k, BigInteger e1, BigInteger n1) {
+        BigInteger k1 = encryptMessage(k, e1, n1);
+        BigInteger signature = k.modPow(d, n);
+        BigInteger s1 = encryptMessage(signature, e1, n1);
+
+        return new BigInteger[] {k1, s1};
+    }
+
+    /**
+     * Receives the specified encrypted key and verifies the specified signature
+     * using the specified public exponent and the specified modulus of transactor who sent this message.
+     *
+     * @param k1 encrypted key
+     * @param s1 signature of the encrypted key
+     * @param e public exponent of the sender
+     * @param n modulus of sender
+     * @return decrypted key
+     */
+    public BigInteger receiveKey(BigInteger k1, BigInteger s1, BigInteger e, BigInteger n) {
+        BigInteger key = decryptMessage(k1);
+        BigInteger signature = decryptMessage(s1);
+
+        if (key.compareTo(encryptMessage(signature, e, n)) == 0) {
+            System.out.println("Verification: true");
+        } else {
+            System.out.println("Verification: false");
+        }
+
+        return key;
     }
 }

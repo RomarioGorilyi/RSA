@@ -11,7 +11,7 @@ import static main.java.ua.kpi.ipt.asymcrypt.rsa.util.BigIntegerUtil.generateRan
 /**
  * @author Roman Horilyi
  */
-public class Transactor {
+public class Party {
 
     /**
      * The first {@code BigInteger} prime number.
@@ -153,7 +153,7 @@ public class Transactor {
 
     /**
      * Receives the specified encrypted key and verifies the specified signature
-     * using the specified public exponent and the specified modulus of transactor who sent this message.
+     * using the specified public exponent and the specified modulus of the message sender.
      *
      * @param k1 encrypted key
      * @param s1 signature of the encrypted key
